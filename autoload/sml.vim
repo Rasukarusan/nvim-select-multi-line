@@ -121,15 +121,19 @@ function! s:yank() abort
   for winbuf in filtered_winbufs
     let yank_str .= winbuf.str . "\n"
   endfor
-  echo '==========copyed!=========='
-  echo yank_str
-  echo '==========================='
+  if get(g:, 'sml#echo_yank_str', 1) == 1
+    echo '==========yanked!=========='
+    echo yank_str
+    echo '==========================='
+  else
+    echo 'yanked!'
+  endif
   let @*=yank_str
   call s:mode_off()
 endfunction
 
 function! s:get_line_no(index, val) abort
-  if a:val.buf != 0 
+  if a:val.buf != 0
     return a:index
   endif
 endfunction
