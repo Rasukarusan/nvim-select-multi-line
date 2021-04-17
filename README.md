@@ -1,8 +1,6 @@
 Nvim Select Multi Line
 ====
 
-**Comming soon...**
-
 yank specific line
 ![demo.gif](https://user-images.githubusercontent.com/17779386/115108415-52a98f00-9fab-11eb-9543-a1e37717a764.gif)
 
@@ -11,16 +9,26 @@ or delete
 
 ## Description
 
-This is Neovim plugin.  
+Neovim plugin.  
 You can select multiple lines that are not adjacent.
 
 ## Requirement
 
+- Neovim >= 0.4
+
 ## Install
+
+You can use the plugin manager. e.g. dein.vim
+```vim
+[[plugins]]
+repo = 'Rasukarusan/nvim-select-multi-line'
+```
 
 ## Usage
 
-start select multi line mode!
+Add a mapping in your `init.vim`.
+
 ```vim
-<Space>v
+" any leader key
+nnoremap <Space>v :call sml#mode_on()<CR>
 ```
