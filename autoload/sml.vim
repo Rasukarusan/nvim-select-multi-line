@@ -21,7 +21,6 @@ function! s:mode_off()
   let g:select_line_mode = 0
   call s:set_keybind(0)
   call s:remove_windows()
-  echo 'End select multi line.'
 endfunction
 
 function! Filter(key, value)
@@ -56,7 +55,6 @@ function! s:create_window()
     \}
 
   " toggle selection
-  echo s:winbufs[line_no]
   if s:winbufs[line_no].buf != 0
     execute s:winbufs[line_no].buf . 'bwipeout'
     let s:winbufs[line_no].buf = 0
@@ -69,8 +67,7 @@ function! s:create_window()
   call nvim_buf_set_option(buf, 'filetype', ft)
   call nvim_win_set_option(win, 'winhighlight', 'Normal:Visual')
   call setline(line('.'), line)
-  let s:winbufs[line_no].buf = buf
-  let s:winbufs[line_no].str = line
+  let s:winbufs[line_no] = {'buf': buf, 'str': line}
   return win
 endfunction
 
@@ -126,5 +123,14 @@ function! s:select_multi() abort
 endfunction
 
 function! s:yank() abort
+  let filtered_winbufs = filter(s:winbufs, function("Filter"))
+  let yank_str = ''
+  for winbuf in filtered_winbufs
+    let yank_str .= winbuf.str . "\n"
+  endfor
+  echo '==========copyed!=========='
+  echo yank_str
+  echo '==========================='
+  let @*=yank_str
   call s:mode_off()
 endfunction
