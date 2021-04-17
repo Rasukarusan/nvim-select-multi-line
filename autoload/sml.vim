@@ -82,7 +82,7 @@ function! s:disable_keybind() abort
   endif
 endfunction
 
-function! s:move_cursor(direction) abort
+function! s:cursor_move(direction) abort
   call cursor(line('.') + a:direction, col('.'))
   call s:select_line()
 endfunction
@@ -91,8 +91,8 @@ function! s:toggle_visual_mode_linewise() abort
   let is_visual_mode_linewise = get(s:, 'is_visual_mode_linewise', 0)
   let s:is_visual_mode_linewise = is_visual_mode_linewise ? 0 : 1
   if is_visual_mode_linewise == 0
-    nnoremap <silent> j :call <SID>move_cursor(1)<CR>
-    nnoremap <silent> k :call <SID>move_cursor(-1)<CR>
+    nnoremap <silent> j :call <SID>cursor_move(1)<CR>
+    nnoremap <silent> k :call <SID>cursor_move(-1)<CR>
     call s:select_line()
   else
     nunmap j
