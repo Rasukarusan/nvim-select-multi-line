@@ -1,31 +1,41 @@
 let s:is_multi = 0
-let s:winbufs = map(range(line('$')), 0)
 let g:select_line_mode = 0
 
-function! s:mode_on()
+" カレントバッファの行数分配列で初期化
+" 行番号でバッファNoと文字列を管理する
+function! s:init_winbufs() abort
+  let s:winbufs = map(range(line('$')), 0)
+  for line_no in range(0, line('$') - 1)
+    let s:winbufs[line_no] = {'buf':0, 'str':''}
+  endfor
+endfunction
+
+function! sml#mode_on()
+  call s:init_winbufs()
   let g:select_line_mode = 1
   call s:set_keybind(1)
+  echo 'Start select multi line!'
 endfunction
 
 function! s:mode_off()
   let g:select_line_mode = 0
   call s:set_keybind(0)
   call s:remove_windows()
+  echo 'End select multi line.'
 endfunction
 
 function! Filter(key, value)
-    return a:value !~ 0
+    return a:value.buf !~ 0
 endfunction
 
 function! s:remove_windows() abort
   if len(s:winbufs) == 0
     return
   endif
-  let s:winbufs = filter(s:winbufs, function("Filter"))
-  for winbuf in s:winbufs
-    execute winbuf . 'bwipeout'
+  let filtered_winbufs = filter(s:winbufs, function("Filter"))
+  for winbuf in filtered_winbufs
+    execute winbuf.buf . 'bwipeout'
   endfor
-  let s:winbufs = map(range(line('$')), 0)
 endfunction
 
 function! s:create_window()
@@ -46,10 +56,11 @@ function! s:create_window()
     \}
 
   " toggle selection
-  let winbuf = get(s:winbufs, line_no, 0)
-  if winbuf != 0
-    let s:winbufs[line_no] = 0
-    execute winbuf . 'bwipeout'
+  echo s:winbufs[line_no]
+  if s:winbufs[line_no].buf != 0
+    execute s:winbufs[line_no].buf . 'bwipeout'
+    let s:winbufs[line_no].buf = 0
+    let s:winbufs[line_no].str = ''
     return
   endif
 
@@ -58,7 +69,8 @@ function! s:create_window()
   call nvim_buf_set_option(buf, 'filetype', ft)
   call nvim_win_set_option(win, 'winhighlight', 'Normal:Visual')
   call setline(line('.'), line)
-  let s:winbufs[line_no] = buf
+  let s:winbufs[line_no].buf = buf
+  let s:winbufs[line_no].str = line
   return win
 endfunction
 
@@ -92,7 +104,6 @@ function! s:move_cursor(direction) abort
     call s:create_window()
     call lib#window#focus_to_main_window()
   endif
-
 endfunction
 
 function! s:select_single() abort
@@ -115,8 +126,5 @@ function! s:select_multi() abort
 endfunction
 
 function! s:yank() abort
-  echo 'yank'
   call s:mode_off()
 endfunction
-
-nnoremap T :call <sid>mode_on()<CR>
