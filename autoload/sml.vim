@@ -1,5 +1,11 @@
-" カレントバッファの行数分配列で初期化
-" 行番号でバッファNoと文字列を管理する
+" カレントバッファの行数分、配列を初期化
+" indexを行番号とし、バッファNoと文字列を管理する
+" ex.) 121行目が'line121'という文字列の場合:
+"   s:winbufs[0] = {buf: 0, 'str': ''}
+"   s:winbufs[1] = {buf: 0, 'str': ''}
+"   ...略
+"   s:winbufs[121] = {buf: buf, 'str': 'line121'}
+"
 function! s:init_winbufs() abort
   let s:winbufs = map(range(line('$') + 1), 0)
   for line_no in range(0, line('$'))
@@ -83,14 +89,23 @@ function! s:disable_keybind() abort
 endfunction
 
 function! s:cursor_move(direction) abort
-  call cursor(line('.') + a:direction, col('.'))
-  call s:select_line()
+  let pre_direction = get(s:, 'pre_direction', 0)
+  if pre_direction != 0 && pre_direction != a:direction
+    call s:select_line()
+    call cursor(line('.') + a:direction, col('.'))
+  else
+    call cursor(line('.') + a:direction, col('.'))
+    call s:select_line()
+    let s:pre_direction = a:direction
+  endif
+
 endfunction
 
 function! s:toggle_visual_mode_linewise() abort
   let is_visual_mode_linewise = get(s:, 'is_visual_mode_linewise', 0)
   let s:is_visual_mode_linewise = is_visual_mode_linewise ? 0 : 1
   if is_visual_mode_linewise == 0
+    let s:pre_direction = 0
     nnoremap <silent> j :call <SID>cursor_move(1)<CR>
     nnoremap <silent> k :call <SID>cursor_move(-1)<CR>
     call s:select_line()
