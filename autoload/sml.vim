@@ -1,6 +1,3 @@
-let s:is_multi = 0
-let g:select_line_mode = 0
-
 " カレントバッファの行数分配列で初期化
 " 行番号でバッファNoと文字列を管理する
 function! s:init_winbufs() abort
@@ -11,15 +8,13 @@ function! s:init_winbufs() abort
 endfunction
 
 function! sml#mode_on()
-  call s:init_winbufs()
-  let g:select_line_mode = 1
-  call s:set_keybind(1)
   echo 'Start select multi line!'
+  call s:init_winbufs()
+  call s:enable_keybind()
 endfunction
 
 function! s:mode_off()
-  let g:select_line_mode = 0
-  call s:set_keybind(0)
+  call s:disable_keybind()
   call s:remove_windows()
 endfunction
 
@@ -31,7 +26,7 @@ function! s:remove_windows() abort
   endfor
 endfunction
 
-function! s:create_window()
+function! s:select_line()
   let line = getline('.')
   let line_no = line('.')
   let row = winline() - 1 + lib#window#get_tabline_height()
@@ -62,48 +57,36 @@ function! s:create_window()
   call nvim_win_set_option(win, 'winhighlight', 'Normal:Visual')
   call setline(line('.'), line)
   let s:winbufs[line_no] = {'buf': buf, 'str': line}
+  call lib#window#focus_to_main_window()
   return win
 endfunction
 
-function! s:set_keybind(mode) abort
-  if a:mode == 1
-    nnoremap <silent> v :call <SID>select_single()<CR>
-    nnoremap <silent> V :call <SID>select_multi()<CR>
-    nnoremap <silent> y :call <SID>yank()<CR>
-    nnoremap <silent> d :call <SID>delete()<CR>
-    nnoremap <silent> j :call <SID>move_cursor(1)<CR>
-    nnoremap <silent> k :call <SID>move_cursor(-1)<CR>
-    nnoremap <silent> <C-c> :call <SID>mode_off()<CR>
-  else
-    nunmap v
-    nunmap V
-    nunmap y
-    nunmap d
-    nunmap j
-    nunmap k
-    nunmap <C-c>
-  endif
+function! s:enable_keybind() abort
+  nnoremap <silent> v :call <SID>select_line()<CR>
+  nnoremap <silent> V :call <SID>select_multi()<CR>
+  nnoremap <silent> y :call <SID>yank()<CR>
+  nnoremap <silent> d :call <SID>delete()<CR>
+  nnoremap <silent> j :call <SID>move_cursor(1)<CR>
+  nnoremap <silent> k :call <SID>move_cursor(-1)<CR>
+  nnoremap <silent> <C-c> :call <SID>mode_off()<CR>
+endfunction
+
+function! s:disable_keybind() abort
+  nunmap v
+  nunmap V
+  nunmap y
+  nunmap d
+  nunmap j
+  nunmap k
+  nunmap <C-c>
 endfunction
 
 function! s:move_cursor(direction) abort
+  call cursor(line('.') + a:direction, col('.'))
+
   let is_multi = get(s:, 'is_multi', 0)
-  if a:direction == 1
-    call cursor(line('.') + 1, col('.'))
-  else
-    call cursor(line('.') - 1, col('.'))
-  endif
-
   if is_multi == 1
-    call s:create_window()
-    call lib#window#focus_to_main_window()
-  endif
-endfunction
-
-function! s:select_single() abort
-  let mode = get(g:, 'select_line_mode', 0)
-  if mode == 1
-    call s:create_window()
-    call lib#window#focus_to_main_window()
+    call s:select_line()
   endif
 endfunction
 
@@ -113,8 +96,7 @@ function! s:select_multi() abort
     let s:is_multi = 0
   else
     let s:is_multi = 1
-    call s:create_window()
-    call lib#window#focus_to_main_window()
+    call s:select_line()
   endif
 endfunction
 
