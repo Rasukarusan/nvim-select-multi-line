@@ -4,8 +4,8 @@ let g:select_line_mode = 0
 " カレントバッファの行数分配列で初期化
 " 行番号でバッファNoと文字列を管理する
 function! s:init_winbufs() abort
-  let s:winbufs = map(range(line('$')), 0)
-  for line_no in range(0, line('$') - 1)
+  let s:winbufs = map(range(line('$') + 1), 0)
+  for line_no in range(0, line('$'))
     let s:winbufs[line_no] = {'buf':0, 'str':''}
   endfor
 endfunction
@@ -23,15 +23,9 @@ function! s:mode_off()
   call s:remove_windows()
 endfunction
 
-function! Filter(key, value)
-    return a:value.buf !~ 0
-endfunction
-
 function! s:remove_windows() abort
-  if len(s:winbufs) == 0
-    return
-  endif
-  let filtered_winbufs = filter(s:winbufs, function("Filter"))
+  if len(s:winbufs) == 0 | return | endif
+  let filtered_winbufs = filter(s:winbufs, { index, val -> val.buf != 0 })
   for winbuf in filtered_winbufs
     execute winbuf.buf . 'bwipeout'
   endfor
@@ -76,6 +70,7 @@ function! s:set_keybind(mode) abort
     nnoremap <silent> v :call <SID>select_single()<CR>
     nnoremap <silent> V :call <SID>select_multi()<CR>
     nnoremap <silent> y :call <SID>yank()<CR>
+    nnoremap <silent> d :call <SID>delete()<CR>
     nnoremap <silent> j :call <SID>move_cursor(1)<CR>
     nnoremap <silent> k :call <SID>move_cursor(-1)<CR>
     nnoremap <silent> <C-c> :call <SID>mode_off()<CR>
@@ -83,6 +78,7 @@ function! s:set_keybind(mode) abort
     nunmap v
     nunmap V
     nunmap y
+    nunmap d
     nunmap j
     nunmap k
     nunmap <C-c>
@@ -123,7 +119,7 @@ function! s:select_multi() abort
 endfunction
 
 function! s:yank() abort
-  let filtered_winbufs = filter(s:winbufs, function("Filter"))
+  let filtered_winbufs = filter(s:winbufs, { index, val -> val.buf != 0 })
   let yank_str = ''
   for winbuf in filtered_winbufs
     let yank_str .= winbuf.str . "\n"
@@ -132,5 +128,19 @@ function! s:yank() abort
   echo yank_str
   echo '==========================='
   let @*=yank_str
+  call s:mode_off()
+endfunction
+
+function! s:get_line_no(index, val) abort
+  if a:val.buf != 0 
+    return a:index
+  endif
+endfunction
+function! s:delete() abort
+  let lines = map(deepcopy(s:winbufs), {index, val -> s:get_line_no(index, val)})
+  let target_lines = filter(lines, { index, val -> val > 0})
+  for target_line in reverse(target_lines)
+    execute target_line . ',' . target_line .'d'
+  endfor
   call s:mode_off()
 endfunction
