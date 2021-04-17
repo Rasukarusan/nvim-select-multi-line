@@ -63,11 +63,9 @@ endfunction
 
 function! s:enable_keybind() abort
   nnoremap <silent> v :call <SID>select_line()<CR>
-  nnoremap <silent> V :call <SID>select_multi()<CR>
+  nnoremap <silent> V :call <SID>toggle_visual_mode_linewise()<CR>
   nnoremap <silent> y :call <SID>yank()<CR>
   nnoremap <silent> d :call <SID>delete()<CR>
-  nnoremap <silent> j :call <SID>move_cursor(1)<CR>
-  nnoremap <silent> k :call <SID>move_cursor(-1)<CR>
   nnoremap <silent> <C-c> :call <SID>mode_off()<CR>
 endfunction
 
@@ -76,27 +74,29 @@ function! s:disable_keybind() abort
   nunmap V
   nunmap y
   nunmap d
-  nunmap j
-  nunmap k
   nunmap <C-c>
+  if get(s:, 'is_visual_mode_linewise', 0) == 1
+    let s:is_visual_mode_linewise = 0
+    nunmap j
+    nunmap k
+  endif
 endfunction
 
 function! s:move_cursor(direction) abort
   call cursor(line('.') + a:direction, col('.'))
-
-  let is_multi = get(s:, 'is_multi', 0)
-  if is_multi == 1
-    call s:select_line()
-  endif
+  call s:select_line()
 endfunction
 
-function! s:select_multi() abort
-  let is_multi = get(s:, 'is_multi', 0)
-  if is_multi == 1
-    let s:is_multi = 0
-  else
-    let s:is_multi = 1
+function! s:toggle_visual_mode_linewise() abort
+  let is_visual_mode_linewise = get(s:, 'is_visual_mode_linewise', 0)
+  let s:is_visual_mode_linewise = is_visual_mode_linewise ? 0 : 1
+  if is_visual_mode_linewise == 0
+    nnoremap <silent> j :call <SID>move_cursor(1)<CR>
+    nnoremap <silent> k :call <SID>move_cursor(-1)<CR>
     call s:select_line()
+  else
+    nunmap j
+    nunmap k
   endif
 endfunction
 
