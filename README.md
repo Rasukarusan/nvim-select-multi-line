@@ -24,6 +24,12 @@ You can use the plugin manager. e.g. dein.vim
 repo = 'Rasukarusan/nvim-select-multi-line'
 ```
 
+Manually
+```vim
+cd $XDG_CONFIG_HOME/nvim/plugin
+git clone https://github.com/Rasukarusan/nvim-select-multi-line.git
+```
+
 ## Usage
 
 Add a mapping in your `init.vim`.
@@ -31,4 +37,13 @@ Add a mapping in your `init.vim`.
 ```vim
 " any leader key
 nnoremap <Space>v :call sml#mode_on()<CR>
+```
+
+## Settings
+
+You can control whether or not to output after yank by `g:sml#echo_yank_str`. Default 1.
+
+init.vim
+```vim
+let g:sml#echo_yank_str = 0
 ```
