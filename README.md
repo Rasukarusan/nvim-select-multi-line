@@ -7,6 +7,9 @@ Nvim Select Multi Line
 
 ## Description
 
+This is Neovim plugin.  
+You can select multiple lines that are not adjacent.
+
 ## Requirement
 
 ## Install
