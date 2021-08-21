@@ -102,7 +102,7 @@ function! s:echo_yank_str(yank_str) abort
 endfunction
 
 function! s:delete() abort
-  for line_no in keys(s:selected_lines)
+  for line_no in reverse(keys(s:selected_lines))
     execute line_no . ',' . line_no .'d'
   endfor
   call s:mode_off()
