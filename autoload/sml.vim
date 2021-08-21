@@ -1,5 +1,4 @@
 let s:mark_ns = nvim_create_namespace('sml')
-let s:mark_ids = []
 let s:selected_lines = {}
 
 function! s:init_selected_lines() abort
@@ -18,7 +17,9 @@ function! s:mode_off()
 endfunction
 
 function! s:remove_marks() abort
-  for mark_id in s:mark_ids
+  let extmarks = nvim_buf_get_extmarks(0, s:mark_ns, 0, -1, {})
+  for extmark in extmarks
+    let mark_id = extmark[0]
     call nvim_buf_del_extmark(0, s:mark_ns, mark_id)
   endfor
 endfunction
@@ -33,7 +34,6 @@ function! s:select_line()
         \ "end_col" : line_length,
         \ "hl_group" : "Visual",
         \})
-  call add(s:mark_ids, mark_id)
   let s:selected_lines[line_no] = line
 endfunction
 
