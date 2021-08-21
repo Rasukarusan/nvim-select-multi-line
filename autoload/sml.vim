@@ -1,9 +1,9 @@
 let s:mark_ns = nvim_create_namespace('sml')
 let s:mark_ids = []
-let s:selected_lines = []
+let s:selected_lines = {}
 
 function! s:init_selected_lines() abort
-  let s:selected_lines = []
+  let s:selected_lines = {}
 endfunction
 
 function! sml#mode_on()
@@ -34,7 +34,7 @@ function! s:select_line()
         \ "hl_group" : "Visual",
         \})
   call add(s:mark_ids, mark_id)
-  call add(s:selected_lines, {'line_no': line_no, 'str': line})
+  let s:selected_lines[line_no] = line
 endfunction
 
 function! s:enable_keybind() abort
@@ -85,10 +85,7 @@ function! s:toggle_visual_mode_linewise() abort
 endfunction
 
 function! s:yank() abort
-  let yank_str = ''
-  for selected in s:selected_lines
-    let yank_str .= selected.str . "\n"
-  endfor
+  let yank_str = join(values(s:selected_lines), "\n")
   call s:echo_yank_str(yank_str)
   let @*=yank_str
   call s:mode_off()
@@ -105,8 +102,9 @@ function! s:echo_yank_str(yank_str) abort
 endfunction
 
 function! s:delete() abort
-  for selected in s:selected_lines
-    execute selected.line_no . ',' . selected.line_no .'d'
+  for line_no in keys(s:selected_lines)
+    execute line_no . ',' . line_no .'d'
   endfor
   call s:mode_off()
 endfunction
+
