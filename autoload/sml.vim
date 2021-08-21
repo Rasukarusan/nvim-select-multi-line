@@ -26,11 +26,11 @@ endfunction
 function! s:select_line()
   let line = getline('.')
   let line_no = line('.')
-  let width = line == '' ? 1 : strdisplaywidth(line)
+  let line_length = line == '' ? 0 : strdisplaywidth(line)
 
   let mark_id = nvim_buf_set_extmark(0, s:mark_ns, line_no - 1, 0, {
         \ "end_line" : line_no - 1,
-        \ "end_col" : width,
+        \ "end_col" : line_length,
         \ "hl_group" : "Visual",
         \})
   call add(s:mark_ids, mark_id)
@@ -68,7 +68,6 @@ function! s:cursor_move(direction) abort
     call s:select_line()
     let s:pre_direction = a:direction
   endif
-
 endfunction
 
 function! s:toggle_visual_mode_linewise() abort
