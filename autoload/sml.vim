@@ -93,9 +93,8 @@ endfunction
 
 function! s:echo_yank_str(yank_str) abort
   if get(g:, 'sml#echo_yank_str', 1) == 1
-    echo '==========yanked!=========='
-    echo a:yank_str
-    echo '==========================='
+    let sep = repeat('-', 20)
+    echo printf("%s yanked! %s \n%s \n%s", sep, sep, a:yank_str, repeat(sep, 3))
   else
     echo 'yanked!'
   endif
