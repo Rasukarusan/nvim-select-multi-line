@@ -18,7 +18,7 @@ You can select multiple lines that are not adjacent.
 
 ## Requirement
 
-- Neovim >= 0.4
+- Neovim >= 0.5
 
 ## Install
 
